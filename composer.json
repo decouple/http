@@ -1,0 +1,12 @@
+{
+    "name": "decouple/http",
+    "description": "HTTP Application Container for the Decouple Framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrew Ewing",
+            "email": "drew@phenocode.com"
+        }
+    ],
+    "require": {}
+}
