@@ -11,6 +11,8 @@
     "require": {},
     "autoload": {
         "psr-4": {
+            "Decouple\\HTTP\\Router\\": "Router/",
+            "Decouple\\HTTP\\Request\\": "Request/",
             "Decouple\\HTTP\\": ""
         }
     }
