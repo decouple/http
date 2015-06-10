@@ -1,4 +1,4 @@
-http
+decouple/http
 ====
 
-HTTP Application Container for the Decouple Framework
+HTTP Application Container & tools for the Decouple Framework.
