@@ -17,7 +17,7 @@ class Router {
       }
       return $this->add($route);
     } else if(is_string($function)) {
-      if(class_exists($function)) {
+      if(class_exists($function, true)) {
         $route = new \Decouple\HTTP\Router\Route\RestfulRoute($pattern, $function);
         return $this->add($route);
       } else if(stristr($function, '@')) {
@@ -28,6 +28,8 @@ class Router {
         }
         $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, [$class,$method]);
         return $this->add($route);
+      } else {
+        throw new \Exception(sprintf("Non-existant class: %s", $function));
       }
     } else if(is_array($function)) {
       $first = array_shift($function);
