@@ -8,7 +8,7 @@ class Router {
   public function __construct(protected Decoupler $decoupler) {
     $this->routes = Vector {};
   }
-  public function serve(string $pattern, mixed $function=null) : int {
+  public function serve(string $type, string $pattern, mixed $function=null) : int {
     if(is_callable($function)) {
       if(is_array($function)) {
         $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, $function);
@@ -48,8 +48,26 @@ class Router {
     $this->routes->add($route);
     return $this->routes->count() - 1 ?: 0;
   }
-  public function get(int $id) : AbstractRoute {
+  public function fetch(int $id) : AbstractRoute {
     return $this->routes->at($id);
+  }
+  public function get(string $pattern, mixed $function=null) : int {
+    return $this->serve('GET', $pattern, $function);
+  }
+  public function post(string $pattern, mixed $function=null) : int {
+    return $this->serve('POST', $pattern, $function);
+  }
+  public function delete(string $pattern, mixed $function=null) : int {
+    return $this->serve('DELETE', $pattern, $function);
+  }
+  public function options(string $pattern, mixed $function=null) : int {
+    return $this->serve('OPTIONS', $pattern, $function);
+  }
+  public function put(string $pattern, mixed $function=null) : int {
+    return $this->serve('PUT', $pattern, $function);
+  }
+  public function head(string $pattern, mixed $function=null) : int {
+    return $this->serve('HEAD', $pattern, $function);
   }
   public function route(Request $request) : mixed {
     foreach($this->routes as $route) {
