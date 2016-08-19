@@ -40,12 +40,12 @@ class App {
     }
     $this->decoupler->set($name, $service);
   }
-  public function addRoutes(KeyedTraversable<string,mixed> $routes) : void {
-    foreach($routes as $pattern => $route) {
-      $this->addRoute($pattern, $route);
+  public function addRoutes(Vector<Vector<string>> $routes) : void {
+    foreach($routes as $route) {
+      $this->addRoute(...$route);
     }
   }
-  public function addRoute(string $pattern, mixed $route) : void {
-    $this->router->serve($pattern, $route);
+  public function addRoute(string $method, string $pattern, mixed $route) : void {
+    $this->router->serve($method, $pattern, $route);
   }
 }
