@@ -7,7 +7,7 @@ class Request {
     protected Map<string,mixed> $get,
     protected Map<string,mixed> $post,
     protected Map<string,mixed> $files,
-    protected string $type='GET'
+    public string $type='GET'
   ) {
     $this->routeParams = Vector {};
   }

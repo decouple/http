@@ -4,17 +4,21 @@ use Decouple\HTTP\Request\Request;
 use Decouple\HTTP\Request\Uri;
 abstract class AbstractRoute implements RouteInterface {
 
-  public function __construct(private string $pattern, protected mixed $callback=null) {
+  public function __construct(public string $method, public string $pattern, public mixed $callback=null) {
     // Do nothing
   }
-  
+
   abstract public function execute(Request $request) : mixed;
 
-  public function matches(Uri $uri) : Vector<string> {
-    $matches = [];
+  public function isValid(Uri $uri) : bool {
     $remaining = preg_replace('|' . $this->pattern . '|', '', $uri);
+    return strlen($remaining) == 0 || $remaining == "/";
+  }
+
+  public function getParams(Uri $uri) : Vector<string> {
+    $matches = [];
     $result = Vector {};
-    if(strlen($remaining) == 0) {
+    if($this->isValid($uri)) {
       preg_match_all('|' . $this->pattern . '|', $uri, $matches);
       if(is_array($matches)) {
         $result->addAll($this->reduce($matches));

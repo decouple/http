@@ -1,19 +1,20 @@
 <?hh // strict
 namespace Decouple\HTTP\Router;
-use Decouple\HTTP\Router\Route\AbstractRoute;
+use Decouple\HTTP\Router\Route\RouteInterface;
 use Decouple\Decoupler\Decoupler;
 use Decouple\HTTP\Request\Request;
 class Router {
-  private Vector<AbstractRoute> $routes;
-  public function __construct(protected Decoupler $decoupler) {
+  private static Vector<AbstractRoute> $routes;
+  public function __construct(private Decoupler $decoupler) {
     $this->routes = Vector {};
   }
   public function serve(string $type, string $pattern, mixed $function=null) : int {
+    $route = null;
     if(is_callable($function)) {
       if(is_array($function)) {
-        $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, $function);
+        $route = new \Decouple\HTTP\Router\Route\MethodRoute($type, $pattern, $function);
       } else {
-        $route = new \Decouple\HTTP\Router\Route\FunctionRoute($pattern, $function);
+        $route = new \Decouple\HTTP\Router\Route\FunctionRoute($type, $pattern, $function);
       }
       return $this->add($route);
     } else if(is_string($function)) {
@@ -26,7 +27,7 @@ class Router {
         if(!class_exists($class) && method_exists($class, $method)) {
           throw new \Exception(sprintf("Service is not a valid class: %s", $class));
         }
-        $route = new \Decouple\HTTP\Router\Route\MethodRoute($pattern, [$class,$method]);
+        $route = new \Decouple\HTTP\Router\Route\MethodRoute($type, $pattern, [$class,$method]);
         return $this->add($route);
       } else {
         throw new \Exception(sprintf("Non-existant class: %s", $function));
@@ -44,9 +45,9 @@ class Router {
     }
     throw new \Exception(sprintf("Invalid route function provided for route %s [%s]", $pattern, $function));
   }
-  public function add(AbstractRoute $route) : int {
+  public function add(RouteInterface $route) : void {
     $this->routes->add($route);
-    return $this->routes->count() - 1 ?: 0;
+    return $this->routes->count();
   }
   public function fetch(int $id) : AbstractRoute {
     return $this->routes->at($id);
@@ -69,11 +70,28 @@ class Router {
   public function head(string $pattern, mixed $function=null) : int {
     return $this->serve('HEAD', $pattern, $function);
   }
+  public function restful(string $pattern, mixed $function=null) : int {
+    return $this->serve('ANY', $pattern, $function);
+  }
+  public function group(Map<string,mixed> $options, Vector <Pair <string, Pair <string,mixed>>> $routes) : void {
+    $prefix = '';
+    $passing = true;
+    if($options->contains('middleware')) {
+      $passing = $this->decoupler->inject($passing);
+    }
+    if($passing) {
+      if($options->contains('prefix')) {
+        $prefix = (string)$options->get('prefix');
+      }
+      foreach($routes as $route) {
+        $this->serve($route[0], $route[1][0], $route[1][1]);
+      }
+    }
+  }
   public function route(Request $request) : mixed {
     foreach($this->routes as $route) {
-      $matches = $route->matches($request->uri);
-      if(count($matches)) {
-        $request->routeParams = $matches;
+      if($route->isValid($request->uri)) {
+        $request->routeParams = $route->getParams($request->uri);
         return $route->execute($request);
       }
     }
