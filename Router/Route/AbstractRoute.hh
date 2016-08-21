@@ -11,8 +11,12 @@ abstract class AbstractRoute implements RouteInterface {
   abstract public function execute(Request $request) : mixed;
 
   public function isValid(Uri $uri) : bool {
-    $remaining = preg_replace('|' . $this->pattern . '|', '', $uri);
-    return strlen($remaining) == 0 || $remaining == "/";
+    if($this->pattern == "/") {
+      return $this->pattern == (string)$uri;
+    } else {
+      $remaining = preg_replace('|' . $this->pattern . '|', '', $uri);
+      return strlen($remaining) == 0 || $remaining == "/";
+    }
   }
 
   public function getParams(Uri $uri) : Vector<string> {
@@ -27,7 +31,7 @@ abstract class AbstractRoute implements RouteInterface {
     return $result;
   }
 
-  private function reduce(KeyedTraversable<mixed,string> $arr) : Vector<string> {
+  protected function reduce(KeyedTraversable<mixed,string> $arr) : Vector<string> {
     $res = Vector {};
     array_walk_recursive($arr, function($a) use ($res) { $res[] = $a; });
     return $res;
