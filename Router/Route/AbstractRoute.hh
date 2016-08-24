@@ -33,7 +33,7 @@ abstract class AbstractRoute implements RouteInterface {
 
   protected function reduce(KeyedTraversable<mixed,string> $arr) : Vector<string> {
     $res = Vector {};
-    array_walk_recursive($arr, function($a) use ($res) { $res[] = $a; });
+    array_walk_recursive($arr, function($a) use ($res) { if(!is_null($a) && $a != "") { $res[] = $a; } });
     return $res;
   }
 

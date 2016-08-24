@@ -41,7 +41,12 @@ class RestfulRoute extends AbstractRoute implements RouteInterface {
   }
 
   public function execute(\Decouple\HTTP\Request\Request $request) : mixed {
-    $route = $request->routeParams->count() > 1 ? $request->routeParams->at(1) : 'index';
+    if($request->routeParams->count()) {
+      $route = $request->routeParams->at(0);
+      $request->routeParams->splice(0, 1);
+    } else {
+      $route = 'index';
+    }
     if(stristr($route, '/')) {
       $params = explode('/', $route);
       $route = array_shift($params);
@@ -51,6 +56,13 @@ class RestfulRoute extends AbstractRoute implements RouteInterface {
     } else {
       $params = [];
     }
+
+    if(method_exists($this->callback, 'any' . ucfirst($route))) {
+      $route = 'any' . ucfirst($route);
+    } else {
+      $route = strtolower($request->type) . ucfirst($route);
+    }
+
     return [$this->callback,$route];
   }
 }
