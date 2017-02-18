@@ -5,12 +5,13 @@ use Decouple\HTTP\Request\Uri;
 class RestfulRoute extends AbstractRoute implements RouteInterface {
   public string $method;
   public function __construct(public string $pattern, public mixed $callback=null) {
+    parent::__construct('ANY', $pattern, $callback);
     $this->method = 'ANY';
     // Do nothing
   }
 
   public function isValid(Uri $uri) : bool {
-    if(strrpos($uri, $this->pattern) === 0) {
+    if(strrpos((string)$uri, $this->pattern) === 0) {
       return true;
     } else if(parent::isValid($uri)) {
       return true;
@@ -22,7 +23,7 @@ class RestfulRoute extends AbstractRoute implements RouteInterface {
     $matches = [];
     $result = Vector {};
     if($this->isValid($uri)) {
-      if(empty($matches)) {
+      if(count($matches)) {
         $parts = explode('/', str_replace($this->pattern, '', $uri));
         $result->addAll($this->reduce($parts));
       } else {
@@ -41,11 +42,10 @@ class RestfulRoute extends AbstractRoute implements RouteInterface {
   }
 
   public function execute(\Decouple\HTTP\Request\Request $request) : mixed {
+    $route = "";
     if($request->routeParams->count()) {
       $route = $request->routeParams->at(0);
       $request->routeParams->splice(0, 1);
-    } else {
-      $route = 'index';
     }
     if(stristr($route, '/')) {
       $params = explode('/', $route);
@@ -55,6 +55,10 @@ class RestfulRoute extends AbstractRoute implements RouteInterface {
       }
     } else {
       $params = [];
+    }
+
+    if($route == "") {
+      $route = 'index';
     }
 
     if(method_exists($this->callback, 'any' . ucfirst($route))) {
