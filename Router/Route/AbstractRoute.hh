@@ -2,13 +2,11 @@
 namespace Decouple\HTTP\Router\Route;
 use Decouple\HTTP\Request\Request;
 use Decouple\HTTP\Request\Uri;
-abstract class AbstractRoute implements RouteInterface {
+abstract class AbstractRoute {
 
   public function __construct(public string $method, public string $pattern, public mixed $callback=null) {
     // Do nothing
   }
-
-  abstract public function execute(Request $request) : mixed;
 
   public function isValid(Uri $uri) : bool {
     if($this->pattern == "/") {

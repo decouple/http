@@ -4,7 +4,7 @@ use Decouple\HTTP\Router\Route\RouteInterface;
 use Decouple\Decoupler\Decoupler;
 use Decouple\HTTP\Request\Request;
 class Router {
-  private static Vector<AbstractRoute> $routes;
+  public Vector<RouteInterface> $routes;
   public function __construct(private Decoupler $decoupler) {
     $this->routes = Vector {};
   }
@@ -49,7 +49,7 @@ class Router {
     $this->routes->add($route);
     return $this->routes->count();
   }
-  public function fetch(int $id) : AbstractRoute {
+  public function fetch(int $id) : RouteInterface {
     return $this->routes->at($id);
   }
   public function get(string $pattern, mixed $function=null) : int {
