@@ -45,7 +45,7 @@ class Router {
     }
     throw new \Exception(sprintf("Invalid route function provided for route %s [%s]", $pattern, $function));
   }
-  public function add(RouteInterface $route) : void {
+  public function add(RouteInterface $route) : int {
     $this->routes->add($route);
     return $this->routes->count();
   }
